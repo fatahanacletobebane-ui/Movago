@@ -1,4 +1,4 @@
-'''<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt">
 <head>
 <meta charset="utf-8" />
@@ -798,4 +798,4 @@ function loadHistory(){
 checkStoredLogin();
 </script>
 </body>
-</html>'''
+</html>
