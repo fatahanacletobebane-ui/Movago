@@ -1,468 +1,174 @@
- '''<!DOCTYPE html>
+'''<!DOCTYPE html>
 <html lang="pt">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>MovaGo — Transporte em Maputo & Matola</title>
+<title>MovaGo — Passageiro</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 <style>
   :root{
-    --primary:#FF6B00;
-    --primary-light:#FF8C42;
-    --secondary:#FFD700;
-    --accent:#00C853;
-    --danger:#ff4757;
-    --info:#3498db;
-    --dark:#0a0a0a;
-    --darker:#050505;
-    --card-bg:rgba(255,255,255,0.03);
-    --glass: rgba(255,255,255,0.06);
-    --text-primary:#ffffff;
-    --text-secondary:#a0a0a0;
-    --gradient-hero: linear-gradient(135deg, #FF6B00 0%, #FFD700 50%, #FF8C42 100%);
-    --gradient-bg: linear-gradient(180deg, #0a0a0a 0%, #1a1a2e 50%, #0f0f23 100%);
+    --primary:#FF6B00;--primary-light:#FF8C42;--secondary:#FFD700;--accent:#00C853;
+    --danger:#ff4757;--info:#3498db;--dark:#0a0a0a;--card-bg:rgba(255,255,255,0.03);
+    --glass:rgba(255,255,255,0.06);--text-primary:#ffffff;--text-secondary:#a0a0a0;
+    --gradient-hero:linear-gradient(135deg,#FF6B00 0%,#FFD700 50%,#FF8C42 100%);
+    --gradient-bg:linear-gradient(180deg,#0a0a0a 0%,#1a1a2e 50%,#0f0f23 100%);
   }
-  
   *{box-sizing:border-box;font-family:'Poppins',system-ui,sans-serif;margin:0;padding:0}
-  
-  body{
-    margin:0; min-height:100vh;
-    background: var(--gradient-bg);
-    display:flex; align-items:center; justify-content:center; 
-    padding:20px; color:var(--text-primary);
-    overflow-x:hidden;
-  }
-  
-  .bg-particles{
-    position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;
-  }
-  .particle{
-    position:absolute;width:4px;height:4px;background:var(--primary);border-radius:50%;
-    animation:float 20s infinite;opacity:0.3;
-  }
-  @keyframes float{
-    0%,100%{transform:translateY(100vh) rotate(0deg);opacity:0}
-    10%{opacity:0.3}
-    90%{opacity:0.3}
-    50%{transform:translateY(-10vh) rotate(180deg)}
-  }
-  
-  .app{
-    width:100%;max-width:480px;border-radius:24px;overflow:hidden;
-    box-shadow:0 25px 80px rgba(255,107,0,0.15), 0 0 0 1px rgba(255,255,255,0.05);
-    background:var(--card-bg);
-    backdrop-filter:blur(20px);
-    position:relative;z-index:1;
-    border:1px solid rgba(255,255,255,0.08);
-    min-height:90vh;
-    display:flex;
-    flex-direction:column;
-  }
-  
-  /* Header */
-  .header{
-    display:flex;justify-content:space-between;align-items:center;
-    padding:20px;
-    background:linear-gradient(180deg, rgba(255,107,0,0.1) 0%, transparent 100%);
-    border-bottom:1px solid rgba(255,255,255,0.05);
-    flex-shrink:0;
-  }
-  
+  body{margin:0;min-height:100vh;background:var(--gradient-bg);display:flex;align-items:center;justify-content:center;padding:20px;color:var(--text-primary);overflow-x:hidden}
+  .app{width:100%;max-width:480px;border-radius:24px;overflow:hidden;box-shadow:0 25px 80px rgba(255,107,0,0.15),0 0 0 1px rgba(255,255,255,0.05);background:var(--card-bg);backdrop-filter:blur(20px);position:relative;z-index:1;border:1px solid rgba(255,255,255,0.08);min-height:90vh;display:flex;flex-direction:column}
+  .header{display:flex;justify-content:space-between;align-items:center;padding:20px;background:linear-gradient(180deg,rgba(255,107,0,0.1) 0%,transparent 100%);border-bottom:1px solid rgba(255,255,255,0.05);flex-shrink:0}
   .logo-container{display:flex;align-items:center;gap:12px}
-  .logo-icon{
-    width:44px;height:44px;border-radius:12px;
-    background:var(--gradient-hero);
-    display:flex;align-items:center;justify-content:center;
-    box-shadow:0 8px 32px rgba(255,107,0,0.3);
-    position:relative;overflow:hidden;
-  }
-  .logo-icon::before{content:"🚗";font-size:22px;z-index:2;position:relative}
-  .logo-icon::after{
-    content:"";position:absolute;inset:0;
-    background:linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%);
-    animation:shimmer 3s infinite;
-  }
-  @keyframes shimmer{
-    0%{transform:translateX(-100%)}
-    100%{transform:translateX(100%)}
-  }
-  
-  .logo-text h1{
-    font-size:26px;font-weight:800;
-    background:var(--gradient-hero);
-    -webkit-background-clip:text;
-    -webkit-text-fill-color:transparent;
-    background-clip:text;
-    letter-spacing:-0.5px;
-    margin:0;
-  }
+  .logo-icon{width:44px;height:44px;border-radius:12px;background:var(--gradient-hero);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 32px rgba(255,107,0,0.3);font-size:22px}
+  .logo-text h1{font-size:26px;font-weight:800;background:var(--gradient-hero);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin:0}
   .logo-text span{font-size:10px;color:var(--text-secondary);font-weight:500;letter-spacing:1px;text-transform:uppercase}
+  .user-menu{display:flex;align-items:center;gap:8px}
+  .user-avatar{width:40px;height:40px;border-radius:50%;background:var(--gradient-hero);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#fff;cursor:pointer;position:relative}
+  .user-avatar .status-indicator{position:absolute;bottom:2px;right:2px;width:12px;height:12px;border-radius:50%;background:var(--accent);border:2px solid var(--dark)}
+  .content{padding:20px;flex:1;overflow-y:auto;display:flex;flex-direction:column}
+  .section{display:none}.section.active{display:block;animation:fadeIn 0.4s ease}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
   
-  .user-menu{
-    display:flex;align-items:center;gap:8px;
-  }
+  /* Login */
+  .login-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center}
+  .login-icon{width:100px;height:100px;border-radius:50%;background:var(--gradient-hero);display:flex;align-items:center;justify-content:center;margin-bottom:24px;box-shadow:0 20px 60px rgba(255,107,0,0.3);animation:pulse-glow 2s infinite;font-size:50px}
+  @keyframes pulse-glow{0%,100%{box-shadow:0 20px 60px rgba(255,107,0,0.3)}50%{box-shadow:0 20px 80px rgba(255,107,0,0.5)}}
+  .login-screen h2{margin-bottom:8px}.login-screen p{color:var(--text-secondary);margin-bottom:32px;font-size:14px}
   
-  .user-avatar{
-    width:40px;height:40px;border-radius:50%;
-    background:var(--gradient-hero);
-    display:flex;align-items:center;justify-content:center;
-    font-weight:700;font-size:16px;color:#fff;
-    cursor:pointer;position:relative;
-  }
-  
-  .status-indicator{
-    position:absolute;bottom:2px;right:2px;width:12px;height:12px;
-    border-radius:50%;background:var(--accent);border:2px solid var(--dark);
-  }
-  .status-indicator.offline{background:var(--text-secondary)}
-  .status-indicator.busy{background:var(--danger)}
-  
-  /* Content */
-  .content{
-    padding:20px;
-    flex:1;
-    overflow-y:auto;
-    display:flex;
-    flex-direction:column;
-  }
-  
-  /* Login Screen */
-  .login-screen{
-    display:flex;flex-direction:column;align-items:center;justify-content:center;
-    min-height:60vh;text-align:center;
-  }
-  
-  .login-icon{
-    width:100px;height:100px;border-radius:50%;
-    background:var(--gradient-hero);
-    display:flex;align-items:center;justify-content:center;
-    margin-bottom:24px;box-shadow:0 20px 60px rgba(255,107,0,0.3);
-    animation:pulse-glow 2s infinite;
-  }
-  @keyframes pulse-glow{
-    0%,100%{box-shadow:0 20px 60px rgba(255,107,0,0.3)}
-    50%{box-shadow:0 20px 80px rgba(255,107,0,0.5)}
-  }
-  .login-icon::before{content:"🚕";font-size:50px}
-  
-  .login-screen h2{font-size:24px;margin-bottom:8px}
-  .login-screen p{color:var(--text-secondary);margin-bottom:32px;font-size:14px}
-  
-  /* Form Elements */
+  /* Forms */
   .formGroup{margin-bottom:16px;position:relative;width:100%}
-  
-  label{
-    display:block;margin-bottom:6px;font-size:12px;color:var(--text-secondary);
-    font-weight:500;text-transform:uppercase;letter-spacing:0.5px;
-  }
-  
+  label{display:block;margin-bottom:6px;font-size:12px;color:var(--text-secondary);font-weight:500;text-transform:uppercase;letter-spacing:0.5px}
   .input-wrapper{position:relative}
-  .input-icon{
-    position:absolute;left:16px;top:50%;transform:translateY(-50%);
-    font-size:18px;color:var(--primary);opacity:0.7;
-  }
-  
-  input, select{
-    width:100%;padding:14px 16px 14px 48px;font-size:15px;color:#fff;
-    background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
-    border-radius:16px;outline:none;transition:all 0.3s ease;
-  }
-  input:focus, select:focus{
-    border-color:var(--primary);
-    background:rgba(255,107,0,0.05);
-    box-shadow:0 0 0 4px rgba(255,107,0,0.1);
-  }
+  .input-icon{position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:18px;color:var(--primary);opacity:0.7}
+  input{width:100%;padding:14px 16px 14px 48px;font-size:15px;color:#fff;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:16px;outline:none;transition:all 0.3s ease}
+  input:focus{border-color:var(--primary);background:rgba(255,107,0,0.05);box-shadow:0 0 0 4px rgba(255,107,0,0.1)}
   input::placeholder{color:rgba(255,255,255,0.3)}
-  input[type="tel"], input[type="password"]{padding-left:48px}
   
-  /* Autocomplete */
-  .autocompleteList{
-    position:absolute;top:calc(100% + 8px);left:0;right:0;z-index:100;
-    background:rgba(20,20,30,0.98);border:1px solid rgba(255,255,255,0.1);
-    border-radius:16px;max-height:280px;overflow-y:auto;
-    box-shadow:0 20px 60px rgba(0,0,0,0.5);
-    display:none;
-  }
+  /* Profile Card */
+  .profile-card{background:var(--glass);border-radius:20px;padding:24px;margin-bottom:20px;text-align:center;border:1px solid rgba(255,255,255,0.05)}
+  .profile-avatar{width:80px;height:80px;border-radius:50%;background:var(--gradient-hero);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:36px;font-weight:700;box-shadow:0 8px 32px rgba(255,107,0,0.3)}
+  .profile-name{font-size:20px;font-weight:700;margin-bottom:4px}
+  .profile-phone{color:var(--text-secondary);font-size:14px;margin-bottom:16px}
+  .profile-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.05)}
+  .profile-stat{text-align:center}
+  .profile-stat-value{font-size:24px;font-weight:700;color:var(--primary)}
+  .profile-stat-label{font-size:11px;color:var(--text-secondary);text-transform:uppercase}
+  
+  /* Menu */
+  .menu-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px}
+  .menu-item{background:var(--glass);border-radius:16px;padding:20px;text-align:center;cursor:pointer;transition:all 0.3s;border:1px solid rgba(255,255,255,0.05)}
+  .menu-item:hover{background:rgba(255,255,255,0.08);transform:translateY(-2px)}
+  .menu-item-icon{font-size:28px;margin-bottom:8px}
+  .menu-item-label{font-size:13px;font-weight:500}
+  
+  /* Trip Form */
+  .autocompleteList{position:absolute;top:calc(100% + 8px);left:0;right:0;z-index:100;background:rgba(20,20,30,0.98);border:1px solid rgba(255,255,255,0.1);border-radius:16px;max-height:280px;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.5);display:none}
   .autocompleteList.active{display:block;animation:slideDown 0.3s ease}
-  @keyframes slideDown{
-    from{opacity:0;transform:translateY(-10px)}
-    to{opacity:1;transform:translateY(0)}
-  }
+  @keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
   .autocompleteList ul{list-style:none;padding:8px;margin:0}
-  .autocompleteList li{
-    padding:12px 16px;cursor:pointer;border-radius:12px;
-    transition:all 0.2s ease;font-size:14px;
-    display:flex;align-items:center;gap:10px;
-  }
-  .autocompleteList li::before{content:"📍";font-size:14px}
+  .autocompleteList li{padding:12px 16px;cursor:pointer;border-radius:12px;transition:all 0.2s ease;font-size:14px;display:flex;align-items:center;gap:10px}
   .autocompleteList li:hover{background:rgba(255,107,0,0.15);color:var(--primary-light)}
   
-  /* Trip Status Cards */
-  .status-card{
-    background:var(--glass);border-radius:20px;padding:20px;margin-bottom:16px;
-    border:1px solid rgba(255,255,255,0.05);position:relative;overflow:hidden;
-  }
+  .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}
+  .info-box{background:var(--glass);padding:16px;border-radius:16px;text-align:center;border:1px solid rgba(255,255,255,0.05)}
+  .info-label{font-size:11px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px}
+  .info-value{font-size:20px;font-weight:700}
   
-  .status-card::before{
-    content:"";position:absolute;top:0;left:0;width:4px;height:100%;
-    background:var(--gradient-hero);
-  }
+  .price-display{background:var(--gradient-hero);border-radius:20px;padding:24px;text-align:center;margin:20px 0;position:relative;overflow:hidden}
+  .price-display::before{content:"";position:absolute;inset:0;background:linear-gradient(45deg,transparent 30%,rgba(255,255,255,0.1) 50%,transparent 70%);animation:shimmer 3s infinite}
+  @keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+  .price-label{font-size:12px;text-transform:uppercase;letter-spacing:1px;opacity:0.9;margin-bottom:8px;position:relative}
+  .price-value{font-size:42px;font-weight:800;position:relative;text-shadow:0 4px 20px rgba(0,0,0,0.3)}
+  .price-currency{font-size:20px;font-weight:600;opacity:0.9}
   
-  .status-header{
-    display:flex;align-items:center;gap:12px;margin-bottom:16px;
-  }
+  /* Buttons */
+  .actionBtn{width:100%;padding:16px;border:none;border-radius:16px;cursor:pointer;font-size:15px;font-weight:600;margin-top:12px;transition:all 0.3s ease;display:flex;align-items:center;justify-content:center;gap:10px;position:relative;overflow:hidden}
+  .actionBtn::before{content:"";position:absolute;inset:0;background:linear-gradient(45deg,transparent 30%,rgba(255,255,255,0.2) 50%,transparent 70%);transform:translateX(-100%);transition:transform 0.6s}
+  .actionBtn:hover::before{transform:translateX(100%)}
+  .actionBtn:disabled{opacity:0.5;cursor:not-allowed}
+  .btn-primary{background:linear-gradient(135deg,var(--primary) 0%,var(--primary-light) 100%);color:#fff;box-shadow:0 8px 32px rgba(255,107,0,0.3)}
+  .btn-primary:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 12px 40px rgba(255,107,0,0.4)}
+  .btn-success{background:linear-gradient(135deg,var(--accent) 0%,#00e676 100%);color:#fff;box-shadow:0 8px 32px rgba(0,200,83,0.3)}
+  .btn-secondary{background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.1)}
+  .btn-danger{background:linear-gradient(135deg,var(--danger) 0%,#ff6b81 100%);color:#fff}
   
-  .status-badge{
-    padding:6px 12px;border-radius:20px;font-size:11px;font-weight:600;
-    text-transform:uppercase;letter-spacing:0.5px;
-  }
+  /* Status Cards */
+  .status-card{background:var(--glass);border-radius:20px;padding:20px;margin-bottom:16px;border:1px solid rgba(255,255,255,0.05);position:relative;overflow:hidden}
+  .status-card::before{content:"";position:absolute;top:0;left:0;width:4px;height:100%;background:var(--gradient-hero)}
+  .status-header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+  .status-badge{padding:6px 12px;border-radius:20px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px}
   .status-badge.searching{background:rgba(255,193,7,0.2);color:#ffc107}
   .status-badge.accepted{background:rgba(0,200,83,0.2);color:#00c853}
   .status-badge.driving{background:rgba(33,150,243,0.2);color:#2196f3}
   .status-badge.arrived{background:rgba(156,39,176,0.2);color:#9c27b0}
   .status-badge.completed{background:rgba(0,200,83,0.2);color:#00c853}
-  .status-badge.cancelled{background:rgba(244,67,54,0.2);color:#f44336}
   
-  .status-time{font-size:12px;color:var(--text-secondary);margin-left:auto}
-  
-  .trip-route{
-    display:flex;align-items:center;gap:12px;margin-bottom:16px;
-  }
-  
-  .route-dot{
-    width:12px;height:12px;border-radius:50%;flex-shrink:0;
-  }
-  .route-dot.pickup{background:var(--primary);box-shadow:0 0 10px var(--primary)}
-  .route-dot.dest{background:var(--secondary);box-shadow:0 0 10px var(--secondary)}
-  
-  .route-line{
-    flex:1;height:2px;background:linear-gradient(90deg, var(--primary), var(--secondary));
-    position:relative;
-  }
-  .route-line::after{
-    content:"";position:absolute;inset:0;
-    background:linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
-    animation:flow 2s infinite;
-  }
-  @keyframes flow{
-    0%{transform:translateX(-100%)}
-    100%{transform:translateX(100%)}
-  }
-  
-  .location-text{font-size:14px;font-weight:500}
-  .location-text small{display:block;color:var(--text-secondary);font-size:12px;font-weight:400}
-  
-  .driver-info{
-    display:flex;align-items:center;gap:16px;padding:16px;
-    background:rgba(0,0,0,0.2);border-radius:16px;margin-top:16px;
-  }
-  
-  .driver-avatar{
-    width:56px;height:56px;border-radius:50%;
-    background:var(--gradient-hero);display:flex;align-items:center;justify-content:center;
-    font-size:24px;flex-shrink:0;
-  }
-  
+  .driver-info{display:flex;align-items:center;gap:16px;padding:16px;background:rgba(0,0,0,0.2);border-radius:16px;margin-top:16px}
+  .driver-avatar{width:56px;height:56px;border-radius:50%;background:var(--gradient-hero);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
   .driver-details{flex:1}
   .driver-name{font-weight:600;font-size:16px;margin-bottom:2px}
   .driver-plate{font-size:13px;color:var(--text-secondary);margin-bottom:4px}
   .driver-rating{display:flex;align-items:center;gap:4px;font-size:13px;color:var(--secondary)}
-  
-  .call-btn{
-    width:48px;height:48px;border-radius:50%;
-    background:var(--accent);border:none;color:#fff;font-size:20px;
-    cursor:pointer;display:flex;align-items:center;justify-content:center;
-    transition:all 0.3s;box-shadow:0 4px 16px rgba(0,200,83,0.3);
-  }
+  .call-btn{width:48px;height:48px;border-radius:50%;background:var(--accent);border:none;color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.3s;box-shadow:0 4px 16px rgba(0,200,83,0.3)}
   .call-btn:hover{transform:scale(1.1);box-shadow:0 6px 24px rgba(0,200,83,0.4)}
   
-  /* Price Display */
-  .price-display{
-    background:var(--gradient-hero);border-radius:20px;padding:24px;text-align:center;
-    margin:20px 0;position:relative;overflow:hidden;
-  }
-  .price-display::before{
-    content:"";position:absolute;inset:0;
-    background:linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
-    animation:shimmer 3s infinite;
-  }
-  .price-label{font-size:12px;text-transform:uppercase;letter-spacing:1px;opacity:0.9;margin-bottom:8px;position:relative}
-  .price-value{font-size:42px;font-weight:800;position:relative;text-shadow:0 4px 20px rgba(0,0,0,0.3)}
-  .price-currency{font-size:20px;font-weight:600;opacity:0.9}
-  
-  /* Action Buttons */
-  .actionBtn{
-    width:100%;padding:16px;border:none;border-radius:16px;cursor:pointer;
-    font-size:15px;font-weight:600;margin-top:12px;
-    transition:all 0.3s ease;display:flex;align-items:center;justify-content:center;gap:10px;
-    position:relative;overflow:hidden;
-  }
-  .actionBtn::before{
-    content:"";position:absolute;inset:0;
-    background:linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.2) 50%, transparent 70%);
-    transform:translateX(-100%);transition:transform 0.6s;
-  }
-  .actionBtn:hover::before{transform:translateX(100%)}
-  .actionBtn:disabled{opacity:0.5;cursor:not-allowed}
-  
-  .btn-primary{
-    background:linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-    color:#fff;box-shadow:0 8px 32px rgba(255,107,0,0.3);
-  }
-  .btn-primary:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 12px 40px rgba(255,107,0,0.4)}
-  
-  .btn-success{
-    background:linear-gradient(135deg, var(--accent) 0%, #00e676 100%);
-    color:#fff;box-shadow:0 8px 32px rgba(0,200,83,0.3);
-  }
-  .btn-success:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 12px 40px rgba(0,200,83,0.4)}
-  
-  .btn-danger{
-    background:linear-gradient(135deg, var(--danger) 0%, #ff6b81 100%);
-    color:#fff;box-shadow:0 8px 32px rgba(255,71,87,0.3);
-  }
-  
-  .btn-secondary{
-    background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.1);
-  }
-  .btn-secondary:hover{background:rgba(255,255,255,0.15)}
-  
-  /* Info Grid */
-  .info-grid{
-    display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0;
-  }
-  .info-box{
-    background:var(--glass);padding:16px;border-radius:16px;text-align:center;
-    border:1px solid rgba(255,255,255,0.05);
-  }
-  .info-label{font-size:11px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px}
-  .info-value{font-size:20px;font-weight:700}
-  
-  /* Loading Animation */
-  .loading-container{
-    display:flex;flex-direction:column;align-items:center;justify-content:center;
-    padding:40px 20px;text-align:center;
-  }
-  .spinner{
-    width:80px;height:80px;border-radius:50%;
-    border:4px solid rgba(255,107,0,0.1);
-    border-top-color:var(--primary);
-    animation:spin 1s linear infinite;margin-bottom:24px;
-    position:relative;
-  }
-  .spinner::before{
-    content:"";position:absolute;inset:-8px;border-radius:50%;
-    border:4px solid transparent;border-top-color:var(--secondary);
-    animation:spin 2s linear infinite reverse;
-  }
+  /* Loading */
+  .loading-container{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;text-align:center}
+  .spinner{width:80px;height:80px;border-radius:50%;border:4px solid rgba(255,107,0,0.1);border-top-color:var(--primary);animation:spin 1s linear infinite;margin-bottom:24px;position:relative}
+  .spinner::before{content:"";position:absolute;inset:-8px;border-radius:50%;border:4px solid transparent;border-top-color:var(--secondary);animation:spin 2s linear infinite reverse}
   @keyframes spin{to{transform:rotate(360deg)}}
   
-  .loading-text{font-size:18px;font-weight:600;margin-bottom:8px}
-  .loading-subtext{font-size:14px;color:var(--text-secondary)}
-  
-  .driver-search-animation{
-    display:flex;gap:8px;justify-content:center;margin-top:24px;
-  }
-  .driver-dot{
-    width:12px;height:12px;border-radius:50%;background:var(--primary);
-    animation:driver-pulse 1.4s infinite ease-in-out both;
-  }
-  .driver-dot:nth-child(1){animation-delay:-0.32s}
-  .driver-dot:nth-child(2){animation-delay:-0.16s}
-  @keyframes driver-pulse{
-    0%,80%,100%{transform:scale(0.6);opacity:0.5}
-    40%{transform:scale(1);opacity:1}
-  }
-  
-  /* Hidden sections */
-  .section{display:none}
-  .section.active{display:block;animation:fadeIn 0.4s ease}
-  @keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-  
-  /* Toast Notifications */
-  .toast-container{
-    position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:10000;
-    display:flex;flex-direction:column;gap:8px;pointer-events:none;
-  }
-  .toast{
-    background:rgba(30,30,40,0.95);color:#fff;padding:14px 24px;border-radius:12px;
-    font-size:14px;font-weight:500;backdrop-filter:blur(10px);
-    border:1px solid rgba(255,255,255,0.1);box-shadow:0 10px 40px rgba(0,0,0,0.3);
-    display:flex;align-items:center;gap:10px;pointer-events:auto;
-    animation:toast-in 0.3s ease;min-width:300px;justify-content:center;
-  }
-  @keyframes toast-in{
-    from{opacity:0;transform:translateX(-50%) translateY(-20px)}
-    to{opacity:1;transform:translateX(-50%) translateY(0)}
-  }
+  /* Toast */
+  .toast-container{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:10000;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+  .toast{background:rgba(30,30,40,0.95);color:#fff;padding:14px 24px;border-radius:12px;font-size:14px;font-weight:500;backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.1);box-shadow:0 10px 40px rgba(0,0,0,0.3);display:flex;align-items:center;gap:10px;pointer-events:auto;animation:toast-in 0.3s ease;min-width:300px;justify-content:center}
+  @keyframes toast-in{from{opacity:0;transform:translateX(-50%) translateY(-20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
   .toast.success{border-left:4px solid var(--accent)}
   .toast.error{border-left:4px solid var(--danger)}
-  .toast.info{border-left:4px solid var(--info)}
   
-  /* Rating Stars */
-  .rating-container{
-    display:flex;flex-direction:column;align-items:center;gap:16px;padding:24px;
-    background:var(--glass);border-radius:20px;margin-top:16px;
-  }
+  /* History List */
+  .history-list{display:flex;flex-direction:column;gap:12px}
+  .history-item{background:var(--glass);border-radius:16px;padding:16px;border:1px solid rgba(255,255,255,0.05);display:flex;align-items:center;gap:16px}
+  .history-icon{width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;font-size:24px}
+  .history-details{flex:1}
+  .history-route{font-weight:600;margin-bottom:4px;font-size:14px}
+  .history-meta{font-size:12px;color:var(--text-secondary);display:flex;gap:12px}
+  .history-price{font-weight:700;color:var(--secondary);font-size:16px}
+  
+  /* Rating */
+  .rating-container{display:flex;flex-direction:column;align-items:center;gap:16px;padding:24px;background:var(--glass);border-radius:20px;margin-top:16px}
   .stars{display:flex;gap:8px}
-  .star{
-    font-size:32px;color:rgba(255,255,255,0.2);cursor:pointer;transition:all 0.2s;
-  }
+  .star{font-size:32px;color:rgba(255,255,255,0.2);cursor:pointer;transition:all 0.2s}
   .star.active{color:var(--secondary);text-shadow:0 0 20px var(--secondary)}
   .star:hover{transform:scale(1.2)}
-  
-  /* Admin Panel */
-  .admin-panel{
-    background:rgba(0,0,0,0.3);border-radius:20px;padding:20px;margin-top:20px;
-    border:1px solid rgba(255,255,255,0.05);
-  }
-  .admin-panel h3{font-size:16px;margin-bottom:16px;color:var(--primary)}
-  
-  /* Scrollbar */
-  ::-webkit-scrollbar{width:6px}
-  ::-webkit-scrollbar-track{background:transparent}
-  ::-webkit-scrollbar-thumb{background:rgba(255,107,0,0.3);border-radius:3px}
-  ::-webkit-scrollbar-thumb:hover{background:rgba(255,107,0,0.5)}
-  
-  /* Responsive */
-  @media(max-width:480px){
-    body{padding:0}
-    .app{border-radius:0;max-width:100%;min-height:100vh;height:100vh}
-  }
 </style>
 </head>
 <body>
-  <div class="bg-particles" id="particles"></div>
   <div class="toast-container" id="toastContainer"></div>
   
   <div class="app">
-    <!-- Header -->
     <div class="header">
       <div class="logo-container">
-        <div class="logo-icon"></div>
+        <div class="logo-icon">🚗</div>
         <div class="logo-text">
           <h1>MovaGo</h1>
-          <span id="userGreeting">Transporte Inteligente</span>
+          <span id="pageTitle">Passageiro</span>
         </div>
       </div>
       <div class="user-menu" id="userMenu" style="display:none">
-        <div class="user-avatar" id="userAvatar" onclick="toggleUserMenu()">
+        <div class="user-avatar" id="userAvatar" onclick="showProfile()">
           <span id="userInitial">?</span>
-          <div class="status-indicator offline" id="userStatus"></div>
+          <div class="status-indicator"></div>
         </div>
       </div>
     </div>
     
     <div class="content" id="mainContent">
       
-      <!-- LOGIN SECTION -->
+      <!-- LOGIN -->
       <div class="section active" id="loginSection">
         <div class="login-screen">
-          <div class="login-icon"></div>
+          <div class="login-icon">🚕</div>
           <h2>Bem-vindo ao MovaGo</h2>
           <p>Transporte rápido e seguro em Maputo e Matola</p>
           
@@ -487,123 +193,177 @@
           </button>
           
           <p style="margin-top:24px;font-size:12px;color:var(--text-secondary)">
-            Primeira vez? Insira seus dados para criar conta automaticamente
+            Primeira vez? Cria conta automática
           </p>
         </div>
       </div>
       
-      <!-- MAIN APP SECTION -->
-      <div class="section" id="appSection">
+      <!-- MAIN MENU -->
+      <div class="section" id="menuSection">
+        <div class="profile-card">
+          <div class="profile-avatar" id="profileAvatar">👤</div>
+          <div class="profile-name" id="profileName">Nome</div>
+          <div class="profile-phone" id="profilePhone">84XXXXXXX</div>
+          <div class="profile-stats">
+            <div class="profile-stat">
+              <div class="profile-stat-value" id="statTrips">0</div>
+              <div class="profile-stat-label">Viagens</div>
+            </div>
+            <div class="profile-stat">
+              <div class="profile-stat-value" id="statRating">5.0</div>
+              <div class="profile-stat-label">Avaliação</div>
+            </div>
+            <div class="profile-stat">
+              <div class="profile-stat-value" id="statPoints">0</div>
+              <div class="profile-stat-label">Pontos</div>
+            </div>
+          </div>
+        </div>
         
-        <!-- Request Form -->
-        <div id="requestForm">
-          <div class="formGroup">
-            <label>📍 Local de Recolha</label>
-            <div class="input-wrapper">
-              <span class="input-icon">🛣️</span>
-              <input type="text" id="pickup" placeholder="Ex: Av. 24 de Julho" autocomplete="off" />
-            </div>
-            <div id="pickupList" class="autocompleteList"></div>
+        <div class="menu-grid">
+          <div class="menu-item" onclick="showTripForm()">
+            <div class="menu-item-icon">🚕</div>
+            <div class="menu-item-label">Nova Viagem</div>
           </div>
-          
-          <div class="formGroup">
-            <label>🎯 Destino</label>
-            <div class="input-wrapper">
-              <span class="input-icon">📍</span>
-              <input type="text" id="destination" placeholder="Ex: Av. Marginal" autocomplete="off" />
-            </div>
-            <div id="destList" class="autocompleteList"></div>
+          <div class="menu-item" onclick="showHistory()">
+            <div class="menu-item-icon">📋</div>
+            <div class="menu-item-label">Histórico</div>
           </div>
-          
-          <div class="info-grid">
-            <div class="info-box">
-              <div class="info-label">Distância</div>
-              <div class="info-value" id="distanceText">— km</div>
-            </div>
-            <div class="info-box">
-              <div class="info-label">Tempo Est.</div>
-              <div class="info-value" id="timeText">— min</div>
-            </div>
+          <div class="menu-item" onclick="showFavorites()">
+            <div class="menu-item-icon">⭐</div>
+            <div class="menu-item-label">Favoritos</div>
           </div>
+          <div class="menu-item" onclick="showSettings()">
+            <div class="menu-item-icon">⚙️</div>
+            <div class="menu-item-label">Definições</div>
+          </div>
+        </div>
+        
+        <button class="actionBtn btn-secondary" onclick="logout()">
+          <span>🚪</span> Sair da Conta
+        </button>
+      </div>
+      
+      <!-- TRIP FORM -->
+      <div class="section" id="tripSection">
+        <button class="actionBtn btn-secondary" onclick="showMenu()" style="margin-bottom:16px">
+          <span>←</span> Voltar
+        </button>
+        
+        <div class="formGroup">
+          <label>📍 Local de Recolha</label>
+          <div class="input-wrapper">
+            <span class="input-icon">🛣️</span>
+            <input type="text" id="pickup" placeholder="Ex: Av. 24 de Julho" autocomplete="off" />
+          </div>
+          <div id="pickupList" class="autocompleteList"></div>
+        </div>
+        
+        <div class="formGroup">
+          <label>🎯 Destino</label>
+          <div class="input-wrapper">
+            <span class="input-icon">📍</span>
+            <input type="text" id="destination" placeholder="Ex: Av. Marginal" autocomplete="off" />
+          </div>
+          <div id="destList" class="autocompleteList"></div>
+        </div>
+        
+        <div class="info-grid">
+          <div class="info-box">
+            <div class="info-label">Distância</div>
+            <div class="info-value" id="distanceText">— km</div>
+          </div>
+          <div class="info-box">
+            <div class="info-label">Tempo Est.</div>
+            <div class="info-value" id="timeText">— min</div>
+          </div>
+        </div>
+        
+        <div class="price-display" id="priceDisplay" style="display:none">
+          <div class="price-label">Preço Estimado</div>
+          <div class="price-value">
+            <span id="priceText">0</span>
+            <span class="price-currency">MTN</span>
+          </div>
+        </div>
+        
+        <button class="actionBtn btn-primary" id="calcBtn" onclick="calculateTrip()">
+          <span>🧮</span> Calcular Rota
+        </button>
+        <button class="actionBtn btn-success" id="requestBtn" onclick="requestTrip()" style="display:none">
+          <span>🚕</span> Pedir Viagem
+        </button>
+      </div>
+      
+      <!-- SEARCHING DRIVER -->
+      <div class="section" id="searchingSection">
+        <div class="loading-container">
+          <div class="spinner"></div>
+          <div class="loading-text">À procura de motoristas...</div>
+          <div class="loading-subtext">Por favor aguarde enquanto encontramos o melhor motorista para si</div>
+          <button class="actionBtn btn-danger" onclick="cancelRequest()" style="margin-top:32px">
+            <span>❌</span> Cancelar Pedido
+          </button>
+        </div>
+      </div>
+      
+      <!-- ACTIVE TRIP -->
+      <div class="section" id="activeTripSection">
+        <div id="activeTripContent"></div>
+      </div>
+      
+      <!-- COMPLETED TRIP -->
+      <div class="section" id="completedSection">
+        <div class="status-card" style="text-align:center">
+          <div style="font-size:60px;margin-bottom:16px">🎉</div>
+          <h3 style="margin-bottom:8px">Viagem Concluída!</h3>
+          <p style="color:var(--text-secondary);margin-bottom:20px">Obrigado por usar MovaGo</p>
           
-          <div class="price-display" id="priceDisplay" style="display:none">
-            <div class="price-label">Preço Estimado</div>
+          <div class="price-display" style="margin:20px 0">
+            <div class="price-label">Total a Pagar</div>
             <div class="price-value">
-              <span id="priceText">0</span>
+              <span id="finalPrice">0</span>
               <span class="price-currency">MTN</span>
             </div>
           </div>
           
-          <button class="actionBtn btn-primary" id="calcBtn" onclick="calculateTrip()">
-            <span>🧮</span> Calcular Rota
-          </button>
-          
-          <button class="actionBtn btn-success" id="requestBtn" onclick="requestTrip()" style="display:none">
-            <span>🚕</span> Pedir Viagem
-          </button>
-        </div>
-        
-        <!-- Searching for Driver -->
-        <div class="loading-container" id="searchingDriver" style="display:none">
-          <div class="spinner"></div>
-          <div class="loading-text">À procura de motoristas...</div>
-          <div class="loading-subtext">Por favor aguarde enquanto encontramos o melhor motorista para si</div>
-          <div class="driver-search-animation">
-            <div class="driver-dot"></div>
-            <div class="driver-dot"></div>
-            <div class="driver-dot"></div>
-          </div>
-          <button class="actionBtn btn-danger" onclick="cancelRequest()" style="margin-top:32px;max-width:200px">
-            <span>❌</span> Cancelar Pedido
-          </button>
-        </div>
-        
-        <!-- Active Trip Status -->
-        <div id="activeTrip" style="display:none">
-          <!-- Status will be dynamically inserted here -->
-        </div>
-        
-        <!-- Trip Completed -->
-        <div id="tripCompleted" style="display:none">
-          <div class="status-card">
-            <div style="text-align:center;padding:20px">
-              <div style="font-size:60px;margin-bottom:16px">🎉</div>
-              <h3 style="margin-bottom:8px">Viagem Concluída!</h3>
-              <p style="color:var(--text-secondary);margin-bottom:20px">Obrigado por usar MovaGo</p>
-              
-              <div class="price-display" style="margin:20px 0">
-                <div class="price-label">Total a Pagar</div>
-                <div class="price-value">
-                  <span id="finalPrice">0</span>
-                  <span class="price-currency">MTN</span>
-                </div>
-              </div>
-              
-              <div class="rating-container">
-                <p style="margin-bottom:8px">Como foi a sua viagem?</p>
-                <div class="stars" id="ratingStars">
-                  <span class="star" onclick="rateTrip(1)">★</span>
-                  <span class="star" onclick="rateTrip(2)">★</span>
-                  <span class="star" onclick="rateTrip(3)">★</span>
-                  <span class="star" onclick="rateTrip(4)">★</span>
-                  <span class="star" onclick="rateTrip(5)">★</span>
-                </div>
-                <p style="font-size:12px;color:var(--text-secondary);margin-top:8px" id="ratingText">Toque nas estrelas para avaliar</p>
-              </div>
-              
-              <button class="actionBtn btn-primary" onclick="finishTrip()" style="margin-top:24px">
-                <span>✓</span> Concluir
-              </button>
+          <div class="rating-container">
+            <p style="margin-bottom:8px">Como foi a sua viagem?</p>
+            <div class="stars" id="ratingStars">
+              <span class="star" onclick="rateTrip(1)">★</span>
+              <span class="star" onclick="rateTrip(2)">★</span>
+              <span class="star" onclick="rateTrip(3)">★</span>
+              <span class="star" onclick="rateTrip(4)">★</span>
+              <span class="star" onclick="rateTrip(5)">★</span>
             </div>
+            <p style="font-size:12px;color:var(--text-secondary);margin-top:8px" id="ratingText">Toque nas estrelas para avaliar</p>
+          </div>
+          
+          <button class="actionBtn btn-primary" onclick="finishTrip()" style="margin-top:24px">
+            <span>✓</span> Concluir
+          </button>
+        </div>
+      </div>
+      
+      <!-- HISTORY -->
+      <div class="section" id="historySection">
+        <button class="actionBtn btn-secondary" onclick="showMenu()" style="margin-bottom:16px">
+          <span>←</span> Voltar
+        </button>
+        <h3 style="margin-bottom:16px">📋 Histórico de Viagens</h3>
+        <div class="history-list" id="historyList">
+          <div class="loading-container">
+            <div class="spinner" style="width:40px;height:40px"></div>
+            <p>A carregar...</p>
           </div>
         </div>
-        
       </div>
+      
     </div>
   </div>
 
 <script>
-// ==================== FIREBASE CONFIG ====================
+// FIREBASE CONFIG
 const firebaseConfig = {
   apiKey: "AIzaSyB_AShautR6NyunXrIqcvV-qr3Zx666lbs",
   authDomain: "boleia-app-6a64a.firebaseapp.com",
@@ -611,204 +371,115 @@ const firebaseConfig = {
   projectId: "boleia-app-6a64a",
   storageBucket: "boleia-app-6a64a.firebasestorage.app",
   messagingSenderId: "654924851219",
-  appId: "1:654924851219:web:12070c9503456c714ff7e6",
-  measurementId: "G-PMGHTF4JZN"
+  appId: "1:654924851219:web:12070c9503456c714ff7e6"
 };
 
-// Initialize Firebase
 firebase.initializeApp(firebaseConfig);
-const database = firebase.database();
-const auth = firebase.auth();
+const db = firebase.database();
 
-// ==================== DATA & STATE ====================
+// STATE
 let currentUser = null;
 let currentTripId = null;
 let tripListener = null;
-let userListener = null;
+let currentTripData = null;
 
+// AVENUES DATA
 const AVENUES = {
-  // Maputo Centro
   "Avenida 24 de Julho": {lat:-25.97180, lon:32.58430},
   "Avenida Marginal": {lat:-25.96540, lon:32.57080},
   "Avenida Eduardo Mondlane": {lat:-25.96610, lon:32.57910},
   "Avenida Julius Nyerere": {lat:-25.97060, lon:32.58790},
-  "Avenida Mao Tse Tung": {lat:-25.95970, lon:32.58240},
-  "Avenida Vladimir Lenin": {lat:-25.95083, lon:32.59000},
   "Avenida Samora Machel": {lat:-25.97320, lon:32.58370},
-  "Avenida Agostinho Neto": {lat:-25.96690, lon:32.57530},
-  "Avenida Guerra Popular": {lat:-25.96200, lon:32.57550},
-  "Avenida de Angola": {lat:-25.94421, lon:32.57295},
-  "Avenida Armando Tivane": {lat:-25.96150, lon:32.58600},
-  "Avenida Joaquim Chissano": {lat:-25.96870, lon:32.58740},
-  "Avenida Karl Marx": {lat:-25.96800, lon:32.57850},
-  "Avenida 25 de Setembro": {lat:-25.96430, lon:32.58120},
-  "Avenida 10 de Novembro": {lat:-25.96770, lon:32.57460},
-  "Avenida Acordos de Lusaka": {lat:-25.96280, lon:32.58920},
-  "Avenida do Trabalho": {lat:-25.96110, lon:32.57940},
-  "Avenida de Moçambique": {lat:-25.96490, lon:32.58860},
-  "Avenida Patrice Lumumba": {lat:-25.95990, lon:32.57980},
-  "Avenida das Forças Armadas": {lat:-25.96650, lon:32.59300},
-  
-  // Pontos Importantes Maputo
   "Shopping 24": {lat:-25.971716, lon:32.583348},
   "Waterfront": {lat:-25.981964, lon:32.584301},
   "Maputo Shopping Center": {lat:-25.976085, lon:32.573464},
   "Baía Mall": {lat:-25.942971, lon:32.620257},
-  "Hotel Cardoso": {lat:-25.978033, lon:32.585862},
-  "Hotel Pestana Rovuma": {lat:-25.968555, lon:32.575249},
-  "Hotel Pestana Polana": {lat:-25.968913, lon:32.597196},
-  "Torres Vermelhas": {lat:-25.980053, lon:32.587528},
-  "Universidade São Tomás": {lat:-25.971185, lon:32.587036},
-  "UDM": {lat:-25.965733, lon:32.567124},
   "Hospital Central": {lat:-25.968757, lon:32.588854},
-  "Hospital Geral de Mavalane": {lat:-25.930268, lon:32.586033},
-  "Hospital Privado": {lat:-25.942855, lon:32.611635},
-  "Clínica Shifaa": {lat:-25.948946, lon:32.586083},
   "Mercado Central": {lat:-25.970815, lon:32.568705},
-  "Mercado do Museu": {lat:-25.975924, lon:32.589162},
-  "Mercado Fajardo": {lat:-25.953991, lon:32.560802},
-  "Mercado Malanga": {lat:-25.954287, lon:32.557296},
-  "Terminal CFM": {lat:-25.970916, lon:32.564429},
-  "Jardim dos Namorados": {lat:-25.980200, lon:32.593332},
-  "South Beach": {lat:-25.957699, lon:32.606826},
-  "Costa do Sol": {lat:-25.940704, lon:32.614175},
+  "Aeroporto": {lat:-25.9208, lon:32.5725},
   "Katembe": {lat:-26.014373, lon:32.566577},
-  
-  // Zimpeto
-  "Missão Roque": {lat:-25.876916, lon:32.566766},
-  "Paragem Coqueiros": {lat:-25.866186, lon:32.566044},
-  "Esquina de Matendene": {lat:-25.845692, lon:32.568703},
-  "Rotunda do CMC": {lat:-25.833532, lon:32.624315},
-  "Mahotas": {lat:-25.873058, lon:32.614463},
-  "Ponte de Albazine": {lat:-25.841115, lon:32.649894},
-  
-  // Matola
-  "Mercado T3": {lat:-25.894701, lon:32.537526},
   "Matola Gare": {lat:-25.813746, lon:32.444719},
-  "Primeira Rotunda": {lat:-25.810787, lon:32.546424},
-  "Segunda Rotunda": {lat:-25.811285, lon:32.528980},
-  "Terceira Rotunda": {lat:-25.815424, lon:32.493743},
-  "Terminal de Matendene": {lat:-25.845364, lon:32.593945},
-  "Shoprite Matola": {lat:-25.952036, lon:32.460444},
-  "Terminal de Mozal": {lat:-25.916154, lon:32.393635},
-  "Machava": {lat:-25.865076, lon:32.469023},
-  "Tsalala": {lat:-25.911268, lon:32.491178},
-  "Cidade da Matola": {lat:-25.979269, lon:32.464423},
-  "Matola C": {lat:-25.923773, lon:32.465738},
-  "Santa Isabel": {lat:-25.740256, lon:32.568451},
-  "Boquisso": {lat:-25.740116, lon:32.567214},
-  "São Dâmaso": {lat:-25.882290, lon:32.500554},
-  "Cavalo Branco": {lat:-25.630089, lon:32.488778},
-  "João Mateus": {lat:-25.956678, lon:32.453082},
-  "Belo Horizonte": {lat:-26.013485, lon:32.393016},
-  
-  // Outras
-  "Namaacha": {lat:-25.988744, lon:31.999160},
-  "Manhiça": {lat:-25.401882, lon:32.808443},
-  "Ressano Garcia": {lat:-25.442597, lon:31.999465},
-  "FACIM": {lat:-25.771838, lon:32.636458}
+  "Mercado T3": {lat:-25.894701, lon:32.537526}
 };
 
-// ==================== UTILITIES ====================
-function showToast(message, type='info'){
+// UTILITIES
+function showToast(msg, type='info'){
   const container = document.getElementById('toastContainer');
   const toast = document.createElement('div');
   toast.className = `toast ${type}`;
-  const icon = type === 'success' ? '✓' : type === 'error' ? '✗' : 'ℹ';
-  toast.innerHTML = `<span>${icon}</span> ${message}`;
+  toast.innerHTML = `<span>${type==='success'?'✓':'✗'}</span> ${msg}`;
   container.appendChild(toast);
-  setTimeout(()=>{
-    toast.style.opacity = '0';
-    toast.style.transform = 'translateX(-50%) translateY(-20px)';
-    setTimeout(()=>toast.remove(), 300);
-  }, 4000);
+  setTimeout(()=>toast.remove(), 4000);
 }
 
-function norm(s){ return (s||'').toString().trim().toLowerCase(); }
-
-function haversineKm(lat1, lon1, lat2, lon2){
-  const R = 6371;
-  const toRad = d => d * Math.PI/180;
-  const dLat = toRad(lat2 - lat1);
-  const dLon = toRad(lon2 - lon1);
-  const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-  return R * c;
+function showSection(id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
 }
 
-function calcPriceFromKm(km){
-  if(km <= 3) return 100;
-  return 100 + (Math.ceil(km) - 3) * 25;
+function norm(s){ return s.toString().trim().toLowerCase(); }
+function haversineKm(lat1,lon1,lat2,lon2){
+  const R=6371, toRad=d=>d*Math.PI/180;
+  const dLat=toRad(lat2-lat1), dLon=toRad(lon2-lon1);
+  const a=Math.sin(dLat/2)**2+Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
 }
+function calcPrice(km){ return km<=3?100:100+(Math.ceil(km)-3)*25; }
+function estimateTime(km){ return Math.ceil(km*2); }
 
-function estimateTime(km){
-  // Assume average 30km/h in city traffic
-  return Math.ceil(km * 2);
-}
-
-// ==================== AUTHENTICATION ====================
+// AUTH
 function checkStoredLogin(){
   const phone = localStorage.getItem('movago_phone');
   const pin = localStorage.getItem('movago_pin');
   if(phone && pin){
     document.getElementById('loginPhone').value = phone;
     document.getElementById('loginPin').value = pin;
-    autoLogin(phone, pin);
+    login(phone, pin);
   }
 }
 
-function autoLogin(phone, pin){
-  // Check if user exists
-  database.ref('users/' + phone).once('value', (snapshot)=>{
-    if(snapshot.exists()){
-      const userData = snapshot.val();
-      if(userData.pin === pin){
-        currentUser = {phone, ...userData};
-        showApp();
+function login(phone, pin){
+  phone = phone || document.getElementById('loginPhone').value.trim();
+  pin = pin || document.getElementById('loginPin').value.trim();
+  
+  if(!phone || phone.length<9){ showToast('Telefone inválido','error'); return; }
+  if(!pin || pin.length!==4){ showToast('PIN deve ter 4 dígitos','error'); return; }
+  
+  db.ref('users/'+phone).once('value').then(snap=>{
+    if(snap.exists()){
+      const user = snap.val();
+      if(user.pin === pin){
+        currentUser = user;
+        localStorage.setItem('movago_phone', phone);
+        localStorage.setItem('movago_pin', pin);
+        showMenu();
+        showToast('Bem-vindo, '+user.name+'!','success');
       }else{
-        showToast('PIN incorreto!', 'error');
+        showToast('PIN incorreto','error');
       }
     }else{
       // Create new user
-      createUser(phone, pin);
+      const newUser = {
+        phone: phone,
+        pin: pin,
+        name: 'Passageiro '+phone.slice(-4),
+        rating: 5.0,
+        totalTrips: 0,
+        points: 0,
+        createdAt: Date.now(),
+        lastLogin: Date.now(),
+        favorites: {},
+        paymentMethods: {default:'cash',cash:true},
+        settings: {notifications:true,language:'pt'}
+      };
+      db.ref('users/'+phone).set(newUser).then(()=>{
+        currentUser = newUser;
+        localStorage.setItem('movago_phone', phone);
+        localStorage.setItem('movago_pin', pin);
+        showMenu();
+        showToast('Conta criada!','success');
+      });
     }
-  });
-}
-
-function login(){
-  const phone = document.getElementById('loginPhone').value.trim();
-  const pin = document.getElementById('loginPin').value.trim();
-  
-  if(!phone || phone.length < 9){
-    showToast('Insira um número de telefone válido', 'error');
-    return;
-  }
-  if(!pin || pin.length !== 4){
-    showToast('Insira um PIN de 4 dígitos', 'error');
-    return;
-  }
-  
-  // Store credentials
-  localStorage.setItem('movago_phone', phone);
-  localStorage.setItem('movago_pin', pin);
-  
-  autoLogin(phone, pin);
-}
-
-function createUser(phone, pin){
-  const userData = {
-    phone: phone,
-    pin: pin,
-    name: 'Passageiro ' + phone.slice(-4),
-    createdAt: Date.now(),
-    rating: 5,
-    trips: 0
-  };
-  
-  database.ref('users/' + phone).set(userData).then(()=>{
-    currentUser = {phone, ...userData};
-    showToast('Conta criada com sucesso!', 'success');
-    showApp();
   });
 }
 
@@ -817,75 +488,82 @@ function logout(){
   localStorage.removeItem('movago_pin');
   currentUser = null;
   if(tripListener) tripListener.off();
-  if(userListener) userListener.off();
   location.reload();
 }
 
-// ==================== UI MANAGEMENT ====================
-function showApp(){
-  document.getElementById('loginSection').classList.remove('active');
-  document.getElementById('appSection').classList.add('active');
+// NAVIGATION
+function showMenu(){
+  showSection('menuSection');
   document.getElementById('userMenu').style.display = 'flex';
-  document.getElementById('userInitial').textContent = currentUser.name.charAt(0).toUpperCase();
-  document.getElementById('userGreeting').textContent = 'Olá, ' + currentUser.name.split(' ')[0];
-  
-  // Check for active trip
+  updateProfileUI();
   checkActiveTrip();
-  
-  // Setup autocomplete
-  setupAutocomplete();
-  
-  // Listen for user updates
-  userListener = database.ref('users/' + currentUser.phone).on('value', (snapshot)=>{
-    if(snapshot.exists()){
-      currentUser = {...currentUser, ...snapshot.val()};
-    }
-  });
 }
 
+function showProfile(){
+  showMenu();
+}
+
+function updateProfileUI(){
+  if(!currentUser) return;
+  document.getElementById('userInitial').textContent = currentUser.name.charAt(0).toUpperCase();
+  document.getElementById('profileName').textContent = currentUser.name;
+  document.getElementById('profilePhone').textContent = currentUser.phone;
+  document.getElementById('profileAvatar').textContent = currentUser.name.charAt(0).toUpperCase();
+  document.getElementById('statTrips').textContent = currentUser.totalTrips || 0;
+  document.getElementById('statRating').textContent = (currentUser.rating || 5).toFixed(1);
+  document.getElementById('statPoints').textContent = currentUser.points || 0;
+}
+
+function showTripForm(){
+  showSection('tripSection');
+  setupAutocomplete();
+}
+
+function showHistory(){
+  showSection('historySection');
+  loadHistory();
+}
+
+function showFavorites(){
+  showToast('Favoritos: em breve','info');
+}
+
+function showSettings(){
+  showToast('Definições: em breve','info');
+}
+
+// AUTOCOMPLETE
 function setupAutocomplete(){
   const pickup = document.getElementById('pickup');
-  const destination = document.getElementById('destination');
+  const dest = document.getElementById('destination');
   
-  pickup.addEventListener('input', ()=> showSuggestions(pickup, 'pickupList'));
-  destination.addEventListener('input', ()=> showSuggestions(destination, 'destList'));
+  pickup.addEventListener('input',()=>showSuggestions(pickup,'pickupList'));
+  dest.addEventListener('input',()=>showSuggestions(dest,'destList'));
   
-  document.addEventListener('click', (e)=>{
+  document.addEventListener('click',e=>{
     if(!e.target.closest('.formGroup')){
-      document.querySelectorAll('.autocompleteList').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.autocompleteList').forEach(el=>el.classList.remove('active'));
     }
   });
 }
 
-function showSuggestions(inputEl, listId){
-  const q = inputEl.value.trim().toLowerCase();
+function showSuggestions(input,listId){
+  const q = input.value.trim().toLowerCase();
   const container = document.getElementById(listId);
   container.innerHTML = '';
-  if(q.length < 1){
-    container.classList.remove('active');
-    return;
-  }
+  if(q.length<1){container.classList.remove('active');return;}
   
   const ul = document.createElement('ul');
-  const names = Object.keys(AVENUES).sort();
-  let added = 0;
-  
-  for(const name of names){
+  Object.keys(AVENUES).sort().forEach(name=>{
     if(name.toLowerCase().includes(q)){
       const li = document.createElement('li');
       li.textContent = name;
-      li.onclick = ()=>{
-        inputEl.value = name;
-        container.classList.remove('active');
-        calculateTrip();
-      };
+      li.onclick = ()=>{input.value=name;container.classList.remove('active');calculateTrip();};
       ul.appendChild(li);
-      added++;
-      if(added >= 8) break;
     }
-  }
+  });
   
-  if(added > 0){
+  if(ul.children.length>0){
     container.appendChild(ul);
     container.classList.add('active');
   }
@@ -895,316 +573,191 @@ function findAvenue(name){
   if(!name) return null;
   const n = norm(name);
   for(const k of Object.keys(AVENUES)){
-    if(norm(k) === n) return {name:k, ...AVENUES[k]};
+    if(norm(k)===n) return {name:k,...AVENUES[k]};
   }
   for(const k of Object.keys(AVENUES)){
-    if(norm(k).includes(n)) return {name:k, ...AVENUES[k]};
+    if(norm(k).includes(n)) return {name:k,...AVENUES[k]};
   }
   return null;
 }
 
-// ==================== TRIP LOGIC ====================
-let currentTripData = null;
-
+// TRIP LOGIC
 function calculateTrip(){
-  const pickup = findAvenue(document.getElementById('pickup').value);
-  const dest = findAvenue(document.getElementById('destination').value);
+  const p = findAvenue(document.getElementById('pickup').value);
+  const d = findAvenue(document.getElementById('destination').value);
   
-  if(!pickup || !dest){
-    showToast('Selecione locais válidos', 'error');
-    return;
-  }
+  if(!p || !d){showToast('Selecione locais válidos','error');return;}
   
-  const km = haversineKm(pickup.lat, pickup.lon, dest.lat, dest.lon);
-  const price = calcPriceFromKm(km);
+  const km = haversineKm(p.lat,p.lon,d.lat,d.lon);
+  const price = calcPrice(km);
   const time = estimateTime(km);
   
   currentTripData = {
-    pickup: pickup.name,
-    pickupLat: pickup.lat,
-    pickupLon: pickup.lon,
-    destination: dest.name,
-    destLat: dest.lat,
-    destLon: dest.lon,
-    distance: km.toFixed(2),
-    price: price,
-    estimatedTime: time
+    pickup:p.name, pickupLat:p.lat, pickupLon:p.lon,
+    destination:d.name, destLat:d.lat, destLon:d.lon,
+    distance:km.toFixed(2), price:price, estimatedTime:time
   };
   
-  document.getElementById('distanceText').textContent = km.toFixed(1) + ' km';
-  document.getElementById('timeText').textContent = time + ' min';
+  document.getElementById('distanceText').textContent = km.toFixed(1)+' km';
+  document.getElementById('timeText').textContent = time+' min';
   document.getElementById('priceText').textContent = price;
   document.getElementById('priceDisplay').style.display = 'block';
   document.getElementById('requestBtn').style.display = 'flex';
-  
-  showToast('Rota calculada!', 'success');
+  showToast('Rota calculada!','success');
 }
 
 function requestTrip(){
-  if(!currentTripData) return;
+  if(!currentTripData || !currentUser) return;
   
-  const tripId = 'trip_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-  currentTripId = tripId;
+  currentTripId = 'trip_'+Date.now()+'_'+Math.random().toString(36).substr(2,9);
   
-  const tripData = {
-    id: tripId,
+  const trip = {
+    id: currentTripId,
     passengerId: currentUser.phone,
     passengerName: currentUser.name,
-    ...currentTripData,
+    passengerRating: currentUser.rating,
     status: 'searching',
     createdAt: Date.now(),
     driverId: null,
-    driverName: null,
-    driverPhone: null,
-    driverPlate: null,
-    driverRating: null,
-    startedAt: null,
-    completedAt: null,
-    actualPrice: currentTripData.price
+    ...currentTripData
   };
   
-  database.ref('trips/' + tripId).set(tripData).then(()=>{
-    // Add to active trips list
-    database.ref('activeTrips/' + tripId).set({
+  db.ref('trips/'+currentTripId).set(trip).then(()=>{
+    db.ref('activeTrips/'+currentTripId).set({
+      tripId: currentTripId,
       passengerId: currentUser.phone,
-      createdAt: Date.now(),
-      status: 'searching'
+      passengerName: currentUser.name,
+      pickup: trip.pickup,
+      destination: trip.destination,
+      price: trip.price,
+      distance: trip.distance,
+      status: 'searching',
+      createdAt: Date.now()
     });
     
-    showSearchingUI();
-    listenToTrip(tripId);
-    showToast('Pedido enviado! Procurando motoristas...', 'success');
+    showSection('searchingSection');
+    listenToTrip(currentTripId);
   });
-}
-
-function showSearchingUI(){
-  document.getElementById('requestForm').style.display = 'none';
-  document.getElementById('searchingDriver').style.display = 'flex';
-  document.getElementById('activeTrip').style.display = 'none';
 }
 
 function listenToTrip(tripId){
   if(tripListener) tripListener.off();
-  
-  tripListener = database.ref('trips/' + tripId).on('value', (snapshot)=>{
-    const trip = snapshot.val();
+  tripListener = db.ref('trips/'+tripId).on('value',snap=>{
+    const trip = snap.val();
     if(!trip) return;
-    
     updateTripUI(trip);
   });
 }
 
 function updateTripUI(trip){
-  const container = document.getElementById('activeTrip');
+  if(trip.status==='searching') return;
   
-  if(trip.status === 'searching'){
-    // Still searching, keep loading screen
+  if(trip.status==='completed'){
+    showCompletedUI(trip);
     return;
   }
   
-  // Hide searching, show trip details
-  document.getElementById('searchingDriver').style.display = 'none';
-  container.style.display = 'block';
+  showSection('activeTripSection');
+  const container = document.getElementById('activeTripContent');
   
-  let statusText = '';
-  let statusClass = '';
-  let showDriver = false;
-  let actionButton = '';
+  const statusMap = {
+    'accepted': {text:'Motorista a caminho', badge:'accepted', action:''},
+    'arrived': {text:'Motorista chegou!', badge:'arrived', action:'<button class="actionBtn btn-success" onclick="confirmPickup()" style="margin-top:16px"><span>✓</span> Confirmar Embarque</button>'},
+    'driving': {text:'Em viagem', badge:'driving', action:''}
+  };
   
-  switch(trip.status){
-    case 'accepted':
-      statusText = 'Motorista a caminho';
-      statusClass = 'accepted';
-      showDriver = true;
-      actionButton = '<button class="actionBtn btn-secondary" onclick="callDriver()"><span>📞</span> Ligar Motorista</button>';
-      break;
-    case 'arrived':
-      statusText = 'Motorista chegou!';
-      statusClass = 'arrived';
-      showDriver = true;
-      actionButton = '<button class="actionBtn btn-success" onclick="confirmPickup()"><span>✓</span> Confirmar Embarque</button>';
-      break;
-    case 'driving':
-      statusText = 'Em viagem';
-      statusClass = 'driving';
-      showDriver = true;
-      actionButton = '<div style="text-align:center;color:var(--text-secondary);padding:12px">🚗 A caminho do destino...</div>';
-      break;
-    case 'completed':
-      showCompletedUI(trip);
-      return;
-    case 'cancelled':
-      showToast('Viagem cancelada', 'error');
-      resetTrip();
-      return;
-  }
-  
-  let driverHtml = '';
-  if(showDriver && trip.driverId){
-    driverHtml = `
-      <div class="driver-info">
-        <div class="driver-avatar">👤</div>
-        <div class="driver-details">
-          <div class="driver-name">${trip.driverName || 'Motorista'}</div>
-          <div class="driver-plate">🚗 ${trip.driverPlate || 'Matrícula não disponível'}</div>
-          <div class="driver-rating">⭐ ${trip.driverRating || '5.0'}</div>
-        </div>
-        <button class="call-btn" onclick="callDriver('${trip.driverPhone}')">📞</button>
-      </div>
-    `;
-  }
+  const s = statusMap[trip.status] || statusMap['accepted'];
   
   container.innerHTML = `
     <div class="status-card">
       <div class="status-header">
-        <span class="status-badge ${statusClass}">${statusText}</span>
-        <span class="status-time">${new Date().toLocaleTimeString('pt-PT', {hour:'2-digit', minute:'2-digit'})}</span>
+        <span class="status-badge ${s.badge}">${s.text}</span>
       </div>
-      
-      <div class="trip-route">
-        <div class="route-dot pickup"></div>
-        <div class="route-line"></div>
-        <div class="route-dot dest"></div>
-      </div>
-      
-      <div style="display:flex;justify-content:space-between;margin-bottom:16px">
-        <div class="location-text">
-          ${trip.pickup}
-          <small>Recolha</small>
+      <div style="margin:16px 0">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+          <span style="color:var(--text-secondary)">De:</span>
+          <span style="font-weight:600">${trip.pickup}</span>
         </div>
-        <div class="location-text" style="text-align:right">
-          ${trip.destination}
-          <small>Destino</small>
+        <div style="display:flex;justify-content:space-between">
+          <span style="color:var(--text-secondary)">Para:</span>
+          <span style="font-weight:600">${trip.destination}</span>
         </div>
       </div>
-      
-      <div class="info-grid">
-        <div class="info-box">
-          <div class="info-label">Distância</div>
-          <div class="info-value">${trip.distance} km</div>
+      ${trip.driverId?`
+      <div class="driver-info">
+        <div class="driver-avatar">👤</div>
+        <div class="driver-details">
+          <div class="driver-name">${trip.driverName}</div>
+          <div class="driver-plate">${trip.driverPlate}</div>
+          <div class="driver-rating">⭐ ${trip.driverRating}</div>
         </div>
-        <div class="info-box">
-          <div class="info-label">Preço</div>
-          <div class="info-value" style="color:var(--secondary)">${trip.actualPrice || trip.price} MTN</div>
-        </div>
+        <button class="call-btn" onclick="window.open('tel:${trip.driverPhone}')">📞</button>
       </div>
-      
-      ${driverHtml}
-      
-      <div style="margin-top:16px">
-        ${actionButton}
-      </div>
-      
-      ${trip.status !== 'completed' ? `
-        <button class="actionBtn btn-danger" onclick="cancelTrip()" style="margin-top:8px;background:rgba(255,71,87,0.2)">
-          <span>❌</span> Cancelar Viagem
-        </button>
-      ` : ''}
+      `:''}
+      ${s.action}
+      <button class="actionBtn btn-danger" onclick="cancelTrip()" style="margin-top:8px;background:rgba(255,71,87,0.2)"><span>❌</span> Cancelar</button>
     </div>
   `;
 }
 
-function callDriver(phone){
-  if(phone){
-    window.open('tel:' + phone);
-  }else{
-    showToast('Número do motorista não disponível', 'error');
-  }
-}
-
 function confirmPickup(){
   if(!currentTripId) return;
-  database.ref('trips/' + currentTripId).update({
-    status: 'driving',
-    startedAt: Date.now()
-  });
-  showToast('Viagem iniciada!', 'success');
+  db.ref('trips/'+currentTripId).update({status:'driving',startedAt:Date.now()});
+  db.ref('activeTrips/'+currentTripId).update({status:'driving'});
 }
 
 function showCompletedUI(trip){
-  document.getElementById('searchingDriver').style.display = 'none';
-  document.getElementById('activeTrip').style.display = 'none';
-  document.getElementById('requestForm').style.display = 'none';
-  document.getElementById('tripCompleted').style.display = 'block';
-  document.getElementById('finalPrice').textContent = trip.actualPrice || trip.price;
+  showSection('completedSection');
+  document.getElementById('finalPrice').textContent = trip.finalPrice || trip.price;
 }
 
 function rateTrip(rating){
-  const stars = document.querySelectorAll('.star');
-  stars.forEach((star, index)=>{
-    if(index < rating){
-      star.classList.add('active');
-    }else{
-      star.classList.remove('active');
-    }
+  document.querySelectorAll('.star').forEach((s,i)=>{
+    s.classList.toggle('active',i<rating);
   });
   document.getElementById('ratingText').textContent = 'Obrigado pela avaliação!';
-  
   if(currentTripId){
-    database.ref('trips/' + currentTripId).update({
-      passengerRating: rating,
-      ratedAt: Date.now()
-    });
+    db.ref('trips/'+currentTripId).update({passengerRating:rating,ratedAt:Date.now()});
   }
 }
 
 function finishTrip(){
-  resetTrip();
-  showToast('Obrigado por usar MovaGo!', 'success');
-}
-
-function resetTrip(){
   currentTripId = null;
   currentTripData = null;
-  if(tripListener){
-    tripListener.off();
-    tripListener = null;
-  }
-  
-  document.getElementById('requestForm').style.display = 'block';
-  document.getElementById('searchingDriver').style.display = 'none';
-  document.getElementById('activeTrip').style.display = 'none';
-  document.getElementById('tripCompleted').style.display = 'none';
   document.getElementById('pickup').value = '';
   document.getElementById('destination').value = '';
   document.getElementById('priceDisplay').style.display = 'none';
   document.getElementById('requestBtn').style.display = 'none';
-  document.getElementById('distanceText').textContent = '— km';
-  document.getElementById('timeText').textContent = '— min';
-}
-
-function cancelRequest(){
-  if(!currentTripId) return;
-  
-  if(confirm('Tem certeza que deseja cancelar?')){
-    database.ref('trips/' + currentTripId).update({
-      status: 'cancelled',
-      cancelledAt: Date.now(),
-      cancelledBy: 'passenger'
-    });
-    database.ref('activeTrips/' + currentTripId).remove();
-    resetTrip();
-    showToast('Pedido cancelado', 'info');
-  }
+  document.querySelectorAll('.star').forEach(s=>s.classList.remove('active'));
+  showMenu();
+  showToast('Viagem concluída!','success');
 }
 
 function cancelTrip(){
-  cancelRequest();
+  if(!currentTripId) return;
+  if(!confirm('Cancelar viagem?')) return;
+  db.ref('trips/'+currentTripId).update({status:'cancelled',cancelledAt:Date.now(),cancelledBy:'passenger'});
+  db.ref('activeTrips/'+currentTripId).remove();
+  currentTripId = null;
+  showMenu();
+  showToast('Viagem cancelada','info');
+}
+
+function cancelRequest(){
+  cancelTrip();
 }
 
 function checkActiveTrip(){
-  // Check if user has any active trip
-  database.ref('trips').orderByChild('passengerId').equalTo(currentUser.phone).once('value', (snapshot)=>{
-    const trips = snapshot.val();
+  if(!currentUser) return;
+  db.ref('trips').orderByChild('passengerId').equalTo(currentUser.phone).once('value',snap=>{
+    const trips = snap.val();
     if(trips){
-      for(const tripId in trips){
-        const trip = trips[tripId];
-        if(['searching', 'accepted', 'arrived', 'driving'].includes(trip.status)){
-          currentTripId = tripId;
-          if(trip.status === 'searching'){
-            showSearchingUI();
-          }
-          listenToTrip(tripId);
+      for(const id in trips){
+        const t = trips[id];
+        if(['searching','accepted','arrived','driving'].includes(t.status)){
+          currentTripId = id;
+          if(t.status==='searching') showSection('searchingSection');
+          listenToTrip(id);
           break;
         }
       }
@@ -1212,25 +765,45 @@ function checkActiveTrip(){
   });
 }
 
-function toggleUserMenu(){
-  if(confirm('Deseja sair da conta?')){
-    logout();
-  }
+function loadHistory(){
+  if(!currentUser) return;
+  const list = document.getElementById('historyList');
+  list.innerHTML = '<div class="loading-container"><div class="spinner" style="width:40px;height:40px"></div><p>A carregar...</p></div>';
+  
+  db.ref('trips').orderByChild('passengerId').equalTo(currentUser.phone).once('value',snap=>{
+    const trips = snap.val();
+    if(!trips){
+      list.innerHTML = '<p style="text-align:center;color:var(--text-secondary)">Sem viagens ainda</p>';
+      return;
+    }
+    
+    const arr = Object.values(trips).sort((a,b)=>b.createdAt-a.createdAt);
+    list.innerHTML = arr.map(t=>`
+      <div class="history-item">
+        <div class="history-icon">🚕</div>
+        <div class="history-details">
+          <div class="history-route">${t.pickup} → ${t.destination}</div>
+          <div class="history-meta">
+            <span>${new Date(t.createdAt).toLocaleDateString('pt-PT')}</span>
+            <span>${t.status==='completed'?'✓ Concluída':t.status}</span>
+          </div>
+        </div>
+        <div class="history-price">${t.price} MTN</div>
+      </div>
+    `).join('');
+  });
 }
 
-// ==================== INITIALIZATION ====================
-// Create background particles
-for(let i=0; i<15; i++){
-  const p = document.createElement('div');
-  p.className = 'particle';
-  p.style.left = Math.random() * 100 + '%';
-  p.style.animationDelay = Math.random() * 20 + 's';
-  p.style.animationDuration = (15 + Math.random() * 10) + 's';
-  document.getElementById('particles').appendChild(p);
-}
-
-// Check stored login on load
+// INIT
 checkStoredLogin();
 </script>
 </body>
 </html>'''
+
+# Salvar arquivo
+with open('/mnt/kimi/output/movago_passageiro_firebase.html', 'w', encoding='utf-8') as f:
+    f.write(passenger_app)
+
+print("✅ App do Passageiro com Conta Firebase criado!")
+print("📁 Arquivo: /mnt/kimi/output/movago_passageiro_firebase.html")
+print(f"📊 Tamanho: {len(passenger_app):,} caracteres")
