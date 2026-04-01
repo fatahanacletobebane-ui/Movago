@@ -799,11 +799,3 @@ checkStoredLogin();
 </script>
 </body>
 </html>'''
-
-# Salvar arquivo
-with open('/mnt/kimi/output/movago_passageiro_firebase.html', 'w', encoding='utf-8') as f:
-    f.write(passenger_app)
-
-print("✅ App do Passageiro com Conta Firebase criado!")
-print("📁 Arquivo: /mnt/kimi/output/movago_passageiro_firebase.html")
-print(f"📊 Tamanho: {len(passenger_app):,} caracteres")
