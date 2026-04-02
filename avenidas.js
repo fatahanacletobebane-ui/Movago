@@ -1,7 +1,7 @@
 // Este é o ficheiro avenidas.js
 // Ele funciona como um dicionário global para o seu App MovaGo
 
-const MOZ_MAP_DATA = {
+const AVENUES = {
   "Avenida 24 de Julho": { lat: -25.97180, lon: 32.58430 },
   "Costa do Sol": { lat: -25.92500, lon: 32.63500 },
   "Avenida Marginal": { lat: -25.96540, lon: 32.57080 },
