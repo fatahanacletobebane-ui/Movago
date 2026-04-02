@@ -640,64 +640,79 @@ function requestTrip(){
   });
 }
 
-function listenToTrip(tripId){
-  if(tripListener) tripListener.off();
-  tripListener = db.ref('trips/'+tripId).on('value',snap=>{
+function listenToTrip(tripId) {
+  if (tripListener) db.ref('trips/' + currentTripId).off(); // Limpa ouvintes anteriores
+  
+  tripListener = db.ref('trips/' + tripId).on('value', snap => {
     const trip = snap.val();
-    if(!trip) return;
-    updateTripUI(trip);
+    if (!trip) return;
+    
+    currentTripData = trip; // Mantém os dados atualizados localmente
+    
+    // LOGICA DE REDIRECIONAMENTO POR STATUS
+    if (trip.status === 'searching') {
+      showSection('searchingSection');
+    } 
+    else if (trip.status === 'completed') {
+      // CORREÇÃO 1: Feedback de conclusão
+      showCompletedUI(trip); 
+    } 
+    else {
+      // Para os status: accepted, arrived, driving
+      updateTripUI(trip);
+    }
   });
 }
 
-function updateTripUI(trip){
-  if(trip.status==='searching') return;
-  
-  if(trip.status==='completed'){
-    showCompletedUI(trip);
-    return;
-  }
-  
+function updateTripUI(trip) {
+  // CORREÇÃO 2: Forçar a troca de seção assim que o status mudar de 'searching'
   showSection('activeTripSection');
+  
   const container = document.getElementById('activeTripContent');
   
+  // Mapeamento de mensagens baseadas no status do motorista
   const statusMap = {
-    'accepted': {text:'Motorista a caminho', badge:'accepted', action:''},
-    'arrived': {text:'Motorista chegou!', badge:'arrived', action:'<button class="actionBtn btn-success" onclick="confirmPickup()" style="margin-top:16px"><span>✓</span> Confirmar Embarque</button>'},
-    'driving': {text:'Em viagem', badge:'driving', action:''}
+    'accepted': { text: 'Motorista a caminho', badge: 'accepted' },
+    'arrived':  { text: 'Motorista no local', badge: 'arrived' },
+    'driving':  { text: 'Viagem em curso...', badge: 'driving' }
   };
-  
-  const s = statusMap[trip.status] || statusMap['accepted'];
-  
+
+  const s = statusMap[trip.status] || { text: 'Em viagem', badge: 'driving' };
+
   container.innerHTML = `
     <div class="status-card">
       <div class="status-header">
         <span class="status-badge ${s.badge}">${s.text}</span>
       </div>
       <div style="margin:16px 0">
-        <div style="display:flex;justify-content:space-between;margin-bottom:8px">
-          <span style="color:var(--text-secondary)">De:</span>
-          <span style="font-weight:600">${trip.pickup}</span>
-        </div>
-        <div style="display:flex;justify-content:space-between">
-          <span style="color:var(--text-secondary)">Para:</span>
-          <span style="font-weight:600">${trip.destination}</span>
-        </div>
+        <p><small>Destino:</small> <strong>${trip.destination}</strong></p>
+        <p><small>Preço:</small> <strong>${trip.price} MTN</strong></p>
       </div>
-      ${trip.driverId?`
       <div class="driver-info">
-        <div class="driver-avatar">👤</div>
+        <div class="driver-avatar">👨🏻‍✈️</div>
         <div class="driver-details">
-          <div class="driver-name">${trip.driverName}</div>
-          <div class="driver-plate">${trip.driverPlate}</div>
-          <div class="driver-rating">⭐ ${trip.driverRating}</div>
+          <div class="driver-name">${trip.driverName || 'Motorista MovaGo'}</div>
+          <div class="driver-plate">${trip.driverPlate || 'AAB-000-MC'}</div>
         </div>
-        <button class="call-btn" onclick="window.open('tel:${trip.driverPhone}')">📞</button>
+        <a href="tel:${trip.driverPhone}" class="call-btn">📞</a>
       </div>
-      `:''}
-      ${s.action}
-      <button class="actionBtn btn-danger" onclick="cancelTrip()" style="margin-top:8px;background:rgba(255,71,87,0.2)"><span>❌</span> Cancelar</button>
     </div>
   `;
+}
+
+// Função para mostrar a tela de conclusão (Feedback)
+function showCompletedUI(trip) {
+  showSection('completedSection');
+  document.getElementById('finalPrice').textContent = trip.price;
+  
+  // Remover o listener da viagem pois ela acabou
+  if (tripListener) {
+    db.ref('trips/' + trip.id).off();
+    tripListener = null;
+  }
+  
+  // Limpar as viagens ativas no banco (opcional, dependendo da sua regra)
+  db.ref('activeTrips/' + trip.id).remove();
 }
 
 function confirmPickup(){
