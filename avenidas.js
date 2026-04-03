@@ -14,10 +14,8 @@ const AVENUES = {
 "R. da Acácias, Maputo ( jardim)": {lat:-25.929147, lon:32.553933},
 "Rua Rainha Santa, inhagoia xibutxana, Maputo": {lat:-25.919913, lon:32.559007},
 "Bairro do Choupal ( paragem)": {lat:-25.909564, lon:32.565437},
-"Su Kasa Bar e Grill
- ( Av. Moçambique)": {lat:-25.898061, lon:32.563842},
-"Mawill park galpão
- ( Av. Moçambique)": {lat:-25.895112, lon:32.563887},
+"Su Kasa Bar e Grill ( Av. Moçambique)": {lat:-25.898061, lon:32.563842},
+"Mawill park galpão ( Av. Moçambique)": {lat:-25.895112, lon:32.563887},
 "Muzza Missão, missão roque ( Av. Moçambique)": {lat:-25.877361, lon:32.566284},
 "Costa do Sol": { lat: -25.92500, lon: 32.63500 },
   "Avenida Marginal": { lat: -25.96540, lon: 32.57080 },
