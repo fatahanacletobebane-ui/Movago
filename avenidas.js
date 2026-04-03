@@ -3,7 +3,23 @@
 
 const AVENUES = {
   "Avenida 24 de Julho": { lat: -25.97180, lon: 32.58430 },
-  "Costa do Sol": { lat: -25.92500, lon: 32.63500 },
+  "Bairro do jardim ( paragem)": {lat:-25.929265, lon:32.555180},
+"1920 restaurante e bar rua da agricultura ( jardim)": {lat:-25.925437, lon:32.544635},
+"Rua do chá ( jardim)": {lat:-25.924016, lon:32.545204},
+"Rua do Algodão ( jardim)": {lat:-25.924570, lon:32.545895},
+"Rua da copra ( jardim)": {lat:-25.925285, lon:32.546322},
+"Rua da sisal ( jardim)": {lat:-25.925846, lon:32.547017},
+"Rua das dálias ( jardim)": {lat:-25.928214, lon:32.552362},
+"Rua da alecrim ( jardim)": {lat:-25.928657, lon:32.553204},
+"R. da Acácias, Maputo ( jardim)": {lat:-25.929147, lon:32.553933},
+"Rua Rainha Santa, inhagoia xibutxana, Maputo": {lat:-25.919913, lon:32.559007},
+"Bairro do Choupal ( paragem)": {lat:-25.909564, lon:32.565437},
+"Su Kasa Bar e Grill
+ ( Av. Moçambique)": {lat:-25.898061, lon:32.563842},
+"Mawill park galpão
+ ( Av. Moçambique)": {lat:-25.895112, lon:32.563887},
+"Muzza Missão, missão roque ( Av. Moçambique)": {lat:-25.877361, lon:32.566284},
+"Costa do Sol": { lat: -25.92500, lon: 32.63500 },
   "Avenida Marginal": { lat: -25.96540, lon: 32.57080 },
   "Avenida Eduardo Mondlane": { lat: -25.96610, lon: 32.57910 },
   "Avenida Julius Nyerere": { lat: -25.97060, lon: 32.58790 },
