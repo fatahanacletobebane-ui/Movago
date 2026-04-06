@@ -113,6 +113,18 @@
   .call-btn{width:48px;height:48px;border-radius:50%;background:var(--accent);border:none;color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.3s;box-shadow:0 4px 16px rgba(0,200,83,0.3)}
   .call-btn:hover{transform:scale(1.1);box-shadow:0 6px 24px rgba(0,200,83,0.4)}
   
+  /* Location Sharing Card */
+  .location-card{background:linear-gradient(135deg,rgba(0,200,83,0.1) 0%,rgba(0,200,83,0.05) 100%);border:1px solid rgba(0,200,83,0.2);border-radius:16px;padding:16px;margin-top:16px}
+  .location-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .location-icon{width:40px;height:40px;border-radius:50%;background:rgba(0,200,83,0.2);display:flex;align-items:center;justify-content:center;font-size:20px}
+  .location-status{flex:1}
+  .location-title{font-weight:600;font-size:14px;color:var(--accent)}
+  .location-subtitle{font-size:12px;color:var(--text-secondary)}
+  .location-coords{font-family:monospace;font-size:11px;color:var(--text-secondary);background:rgba(0,0,0,0.3);padding:8px;border-radius:8px;margin-top:8px}
+  .location-pulse{width:12px;height:12px;border-radius:50%;background:var(--accent);position:relative}
+  .location-pulse::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--accent);animation:pulse-ring 2s infinite}
+  @keyframes pulse-ring{0%{transform:scale(1);opacity:1}100%{transform:scale(2);opacity:0}}
+  
   /* Loading */
   .loading-container{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;text-align:center}
   .spinner{width:80px;height:80px;border-radius:50%;border:4px solid rgba(255,107,0,0.1);border-top-color:var(--primary);animation:spin 1s linear infinite;margin-bottom:24px;position:relative}
@@ -125,6 +137,7 @@
   @keyframes toast-in{from{opacity:0;transform:translateX(-50%) translateY(-20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
   .toast.success{border-left:4px solid var(--accent)}
   .toast.error{border-left:4px solid var(--danger)}
+  .toast.info{border-left:4px solid var(--info)}
   
   /* History List */
   .history-list{display:flex;flex-direction:column;gap:12px}
@@ -141,11 +154,36 @@
   .star{font-size:32px;color:rgba(255,255,255,0.2);cursor:pointer;transition:all 0.2s}
   .star.active{color:var(--secondary);text-shadow:0 0 20px var(--secondary)}
   .star:hover{transform:scale(1.2)}
+  
+  /* Permission Modal */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9999;display:none;align-items:center;justify-content:center;padding:20px}
+  .modal-overlay.active{display:flex}
+  .modal-content{background:var(--card-bg);border-radius:24px;padding:24px;max-width:400px;width:100%;border:1px solid rgba(255,255,255,0.1);text-align:center}
+  .modal-icon{font-size:48px;margin-bottom:16px}
+  .modal-title{font-size:20px;font-weight:700;margin-bottom:8px}
+  .modal-text{color:var(--text-secondary);font-size:14px;margin-bottom:24px;line-height:1.5}
+  .modal-buttons{display:flex;gap:12px}
+  .modal-btn{flex:1;padding:14px;border-radius:12px;border:none;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.3s}
+  .modal-btn-primary{background:var(--accent);color:#fff}
+  .modal-btn-secondary{background:rgba(255,255,255,0.1);color:#fff}
 </style>
 </head>
 <body>
   <div class="toast-container" id="toastContainer"></div>
   
+  <!-- Permission Modal -->
+  <div class="modal-overlay" id="locationModal">
+    <div class="modal-content">
+      <div class="modal-icon">📍</div>
+      <div class="modal-title">Partilhar Localização</div>
+      <div class="modal-text">Para que o motorista o encontre facilmente, precisamos de acesso à sua localização GPS. A localização será partilhada apenas durante a viagem.</div>
+      <div class="modal-buttons">
+        <button class="modal-btn modal-btn-secondary" onclick="denyLocation()">Agora Não</button>
+        <button class="modal-btn modal-btn-primary" onclick="requestLocationPermission()">Permitir</button>
+      </div>
+    </div>
+  </div>
+
   <div class="app">
     <div class="header">
       <div class="logo-container">
@@ -383,13 +421,15 @@ let currentUser = null;
 let currentTripId = null;
 let tripListener = null;
 let currentTripData = null;
+let locationWatchId = null;
+let isLocationSharing = false;
 
 // UTILITIES
 function showToast(msg, type='info'){
   const container = document.getElementById('toastContainer');
   const toast = document.createElement('div');
   toast.className = `toast ${type}`;
-  toast.innerHTML = `<span>${type==='success'?'✓':'✗'}</span> ${msg}`;
+  toast.innerHTML = `<span>${type==='success'?'✓':type==='error'?'✗':'ℹ'}</span> ${msg}`;
   container.appendChild(toast);
   setTimeout(()=>toast.remove(), 4000);
 }
@@ -408,6 +448,139 @@ function haversineKm(lat1,lon1,lat2,lon2){
 }
 function calcPrice(km){ return km<=3?100:100+(Math.ceil(km)-3)*25; }
 function estimateTime(km){ return Math.ceil(km*2); }
+
+// LOCATION SHARING FUNCTIONS
+function requestLocationPermission() {
+  document.getElementById('locationModal').classList.remove('active');
+  
+  if (!navigator.geolocation) {
+    showToast('Geolocalização não suportada neste dispositivo', 'error');
+    return;
+  }
+  
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      showToast('Localização ativada! O motorista poderá ver a sua posição.', 'success');
+      startLocationSharing();
+    },
+    (error) => {
+      let msg = 'Erro ao obter localização';
+      switch(error.code) {
+        case error.PERMISSION_DENIED:
+          msg = 'Permissão de localização negada. O motorista pode ter dificuldade em encontrá-lo.';
+          break;
+        case error.POSITION_UNAVAILABLE:
+          msg = 'Localização indisponível. Verifique o GPS.';
+          break;
+        case error.TIMEOUT:
+          msg = 'Tempo esgotado ao obter localização.';
+          break;
+      }
+      showToast(msg, 'error');
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0
+    }
+  );
+}
+
+function denyLocation() {
+  document.getElementById('locationModal').classList.remove('active');
+  showToast('Localização não partilhada. O motorista usará o endereço indicado.', 'info');
+}
+
+function startLocationSharing() {
+  if (!currentTripId || !navigator.geolocation) return;
+  
+  isLocationSharing = true;
+  
+  // Atualizar imediatamente
+  updateLocationToFirebase();
+  
+  // Iniciar watch para atualizações contínuas
+  locationWatchId = navigator.geolocation.watchPosition(
+    (position) => {
+      if (!isLocationSharing || !currentTripId) return;
+      
+      const locationData = {
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+        accuracy: position.coords.accuracy,
+        altitude: position.coords.altitude,
+        heading: position.coords.heading,
+        speed: position.coords.speed,
+        timestamp: Date.now(),
+        updatedAt: new Date().toISOString()
+      };
+      
+      // Guardar no Firebase sob a viagem atual
+      db.ref('trips/' + currentTripId + '/passengerLocation').set(locationData);
+      db.ref('activeTrips/' + currentTripId + '/passengerLocation').set(locationData);
+      
+      // Atualizar UI se estiver na secção ativa
+      updateLocationUI(locationData);
+    },
+    (error) => {
+      console.error('Location error:', error);
+      showToast('Erro na localização: ' + error.message, 'error');
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 5000
+    }
+  );
+  
+  showToast('📍 A partilhar localização com o motorista', 'success');
+}
+
+function updateLocationToFirebase() {
+  if (!currentTripId) return;
+  
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const locationData = {
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+        accuracy: position.coords.accuracy,
+        timestamp: Date.now(),
+        updatedAt: new Date().toISOString()
+      };
+      
+      db.ref('trips/' + currentTripId + '/passengerLocation').set(locationData);
+      db.ref('activeTrips/' + currentTripId + '/passengerLocation').set(locationData);
+    },
+    null,
+    { enableHighAccuracy: true }
+  );
+}
+
+function stopLocationSharing() {
+  isLocationSharing = false;
+  if (locationWatchId !== null) {
+    navigator.geolocation.clearWatch(locationWatchId);
+    locationWatchId = null;
+  }
+  
+  // Limpar localização do Firebase
+  if (currentTripId) {
+    db.ref('trips/' + currentTripId + '/passengerLocation').remove();
+    db.ref('activeTrips/' + currentTripId + '/passengerLocation').remove();
+  }
+}
+
+function updateLocationUI(locationData) {
+  const locationElement = document.getElementById('liveLocationCoords');
+  if (locationElement) {
+    locationElement.textContent = `${locationData.latitude.toFixed(6)}, ${locationData.longitude.toFixed(6)}`;
+  }
+}
+
+function showLocationModal() {
+  document.getElementById('locationModal').classList.add('active');
+}
 
 // AUTH
 function checkStoredLogin(){
@@ -466,6 +639,7 @@ function login(phone, pin){
 }
 
 function logout(){
+  stopLocationSharing();
   localStorage.removeItem('movago_phone');
   localStorage.removeItem('movago_pin');
   currentUser = null;
@@ -619,40 +793,41 @@ function requestTrip(){
     
     showSection('searchingSection');
     listenToTrip(currentTripId);
+    
+    // Pedir permissão de localização quando pedir viagem
+    setTimeout(() => {
+      showLocationModal();
+    }, 1000);
   });
 }
 
 function listenToTrip(tripId) {
-  if (tripListener) db.ref('trips/' + currentTripId).off(); // Limpa ouvintes anteriores
+  if (tripListener) db.ref('trips/' + currentTripId).off();
   
   tripListener = db.ref('trips/' + tripId).on('value', snap => {
     const trip = snap.val();
     if (!trip) return;
     
-    currentTripData = trip; // Mantém os dados atualizados localmente
+    currentTripData = trip;
     
-    // LOGICA DE REDIRECIONAMENTO POR STATUS
     if (trip.status === 'searching') {
       showSection('searchingSection');
     } 
     else if (trip.status === 'completed') {
-      // CORREÇÃO 1: Feedback de conclusão
+      stopLocationSharing();
       showCompletedUI(trip); 
     } 
     else {
-      // Para os status: accepted, arrived, driving
       updateTripUI(trip);
     }
   });
 }
 
 function updateTripUI(trip) {
-  // CORREÇÃO 2: Forçar a troca de seção assim que o status mudar de 'searching'
   showSection('activeTripSection');
   
   const container = document.getElementById('activeTripContent');
   
-  // Mapeamento de mensagens baseadas no status do motorista
   const statusMap = {
     'accepted': { text: 'Motorista a caminho', badge: 'accepted' },
     'arrived':  { text: 'Motorista no local', badge: 'arrived' },
@@ -660,6 +835,37 @@ function updateTripUI(trip) {
   };
 
   const s = statusMap[trip.status] || { text: 'Em viagem', badge: 'driving' };
+  
+  // Verificar se temos localização do passageiro
+  const hasLocation = trip.passengerLocation && trip.passengerLocation.latitude;
+  const locationHTML = hasLocation ? `
+    <div class="location-card">
+      <div class="location-header">
+        <div class="location-icon">📍</div>
+        <div class="location-status">
+          <div class="location-title">Localização Partilhada</div>
+          <div class="location-subtitle">O motorista vê a sua posição em tempo real</div>
+        </div>
+        <div class="location-pulse"></div>
+      </div>
+      <div class="location-coords" id="liveLocationCoords">
+        ${trip.passengerLocation.latitude.toFixed(6)}, ${trip.passengerLocation.longitude.toFixed(6)}
+      </div>
+    </div>
+  ` : `
+    <div class="location-card" style="background:linear-gradient(135deg,rgba(255,107,0,0.1) 0%,rgba(255,107,0,0.05) 100%);border-color:rgba(255,107,0,0.2)">
+      <div class="location-header">
+        <div class="location-icon" style="background:rgba(255,107,0,0.2)">📍</div>
+        <div class="location-status">
+          <div class="location-title" style="color:var(--primary)">Localização Não Ativa</div>
+          <div class="location-subtitle">Toque para partilhar a sua posição com o motorista</div>
+        </div>
+      </div>
+      <button class="actionBtn btn-primary" onclick="showLocationModal()" style="margin-top:12px">
+        <span>📍</span> Ativar Localização
+      </button>
+    </div>
+  `;
 
   container.innerHTML = `
     <div class="status-card">
@@ -678,34 +884,32 @@ function updateTripUI(trip) {
         </div>
         <a href="tel:${trip.driverPhone}" class="call-btn">📞</a>
       </div>
+      ${locationHTML}
     </div>
+    <button class="actionBtn btn-danger" onclick="cancelTrip()">
+      <span>❌</span> Cancelar Viagem
+    </button>
   `;
+  
+  // Se a viagem está ativa e temos permissão, garantir que a localização está a ser partilhada
+  if (trip.status === 'accepted' || trip.status === 'arrived' || trip.status === 'driving') {
+    if (!isLocationSharing && hasLocation) {
+      // Retomar partilha se foi previamente ativada
+      startLocationSharing();
+    }
+  }
 }
 
-// Função para mostrar a tela de conclusão (Feedback)
 function showCompletedUI(trip) {
   showSection('completedSection');
   document.getElementById('finalPrice').textContent = trip.price;
   
-  // Remover o listener da viagem pois ela acabou
   if (tripListener) {
     db.ref('trips/' + trip.id).off();
     tripListener = null;
   }
   
-  // Limpar as viagens ativas no banco (opcional, dependendo da sua regra)
   db.ref('activeTrips/' + trip.id).remove();
-}
-
-function confirmPickup(){
-  if(!currentTripId) return;
-  db.ref('trips/'+currentTripId).update({status:'driving',startedAt:Date.now()});
-  db.ref('activeTrips/'+currentTripId).update({status:'driving'});
-}
-
-function showCompletedUI(trip){
-  showSection('completedSection');
-  document.getElementById('finalPrice').textContent = trip.finalPrice || trip.price;
 }
 
 function rateTrip(rating){
@@ -733,6 +937,9 @@ function finishTrip(){
 function cancelTrip(){
   if(!currentTripId) return;
   if(!confirm('Cancelar viagem?')) return;
+  
+  stopLocationSharing();
+  
   db.ref('trips/'+currentTripId).update({status:'cancelled',cancelledAt:Date.now(),cancelledBy:'passenger'});
   db.ref('activeTrips/'+currentTripId).remove();
   currentTripId = null;
